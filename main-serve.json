@@ -49,6 +49,11 @@
             ],
             "title": "Main Serve"
         },
+        "EnvVar": {
+            "type": "string",
+            "description": "An environment variable reference, e.g. ${MY_VAR}",
+            "pattern": "\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+        },
         "Auth": {
             "type": "object",
             "additionalProperties": false,
@@ -77,9 +82,11 @@
             "additionalProperties": false,
             "properties": {
                 "location": {
-                    "type": "string",
                     "description": "Where to look for the API key: \"header\" or \"query\".",
-                    "enum": [ "header", "query" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "header", "query" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "header"
                 },
                 "name": {
@@ -177,17 +184,22 @@
                     "description": "Secret key for HMAC signing, or path to public key for RSA/EC. (Use ${ENV_VAR})"
                 },
                 "algorithm": {
-                    "type": "string",
                     "description": "JWT algorithm. Leave unspecified for default (HS256).",
-                    "enum": [
-                        "HS256",
-                        "HS384",
-                        "HS512",
-                        "RS256",
-                        "RS384",
-                        "RS512",
-                        "ES256",
-                        "ES384"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "enum": [
+                                "HS256",
+                                "HS384",
+                                "HS512",
+                                "RS256",
+                                "RS384",
+                                "RS512",
+                                "ES256",
+                                "ES384"
+                            ]
+                        },
+                        { "$ref": "#/definitions/EnvVar" }
                     ],
                     "default": "HS256"
                 },
@@ -326,8 +338,10 @@
                     "type": "array",
                     "description": "Allowed HTTP methods.",
                     "items": {
-                        "type": "string",
-                        "enum": [ "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD" ]
+                        "anyOf": [
+                            { "type": "string", "enum": [ "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD" ] },
+                            { "$ref": "#/definitions/EnvVar" }
+                        ]
                     },
                     "default": "[\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\", \"HEAD\"]"
                 },
@@ -368,9 +382,11 @@
             "additionalProperties": false,
             "properties": {
                 "driver": {
-                    "type": "string",
                     "description": "Database driver: postgres, mysql, sqlite",
-                    "enum": [ "postgres", "mysql", "sqlite" ]
+                    "anyOf": [
+                        { "type": "string", "enum": [ "postgres", "mysql", "sqlite" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ]
                 },
                 "url": {
                     "type": "string",
@@ -426,20 +442,25 @@
                     "type": "array",
                     "description": "Supported HTTP verbs.",
                     "items": {
-                        "type": "string",
-                        "enum": [
-                            "get", "post", "put", "patch", "delete"
+                        "anyOf": [
+                            { "type": "string", "enum": [ "get", "post", "put", "patch", "delete" ] },
+                            { "$ref": "#/definitions/EnvVar" }
                         ]
                     }  
                 },
                 "action": {
-                    "type": "string",
                     "description": "Type of action to perform.",
-                    "enum": [
-                        "crud",
-                        "proxy",
-                        "static",
-                        "custom_response"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "enum": [
+                                "crud",
+                                "proxy",
+                                "static",
+                                "custom_response"
+                            ]
+                        },
+                        { "$ref": "#/definitions/EnvVar" }
                     ]  
                 },
                 "crud": {
@@ -615,9 +636,11 @@
                     "examples": [ "users.org_id = organizations.id" ]
                 },
                 "type": {
-                    "type": "string",
                     "description": "The type of join.",
-                    "enum": [ "inner", "left", "right" ]
+                    "anyOf": [
+                        { "type": "string", "enum": [ "inner", "left", "right" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ]
                 },
                 "fields": {
                     "type": "array",
@@ -688,9 +711,11 @@
                     "default": "created_at"
                 },
                 "default_order": {
-                    "type": "string",
                     "description": "Default sort order.",
-                    "enum": [ "asc", "desc" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "asc", "desc" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "desc"                    
                 },
                 "allowed_fields": {
@@ -877,15 +902,19 @@
             "additionalProperties": false,
             "properties": {
                 "level": {
-                    "type": "string",
                     "description": "Log level: trace, debug, info, warn, error",
-                    "enum": [ "trace", "debug", "info", "warn", "error" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "trace", "debug", "info", "warn", "error" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "info"
                 },
                 "format": {
-                    "type": "string",
                     "description": "Output format: \"json\" or \"pretty\"",
-                    "enum": [ "json", "pretty" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "json", "pretty" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "pretty"
                 },
                 "log_request_body": {
@@ -926,9 +955,11 @@
                     "default": 60
                 },
                 "key_strategy": {
-                    "type": "string",
                     "description": "Key extraction strategy:\n  - ip: rate limit by client IP\n  - header: rate limit by value of a specific header (set key_header)\n  - token: rate limit by auth token / API key",
-                    "enum": [ "ip", "header", "token" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "ip", "header", "token" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "ip"
                 },
                 "key_header": {
@@ -1070,29 +1101,34 @@
                     "description": "Column name as it will appear in the database."
                 },
                 "type": {
-                    "type": "string",
                     "description": "Column data type.",
-                    "enum": [
-                        "integer",
-                        "bigint",
-                        "smallint",
-                        "serial",
-                        "bigserial",
-                        "text",
-                        "varchar",
-                        "char",
-                        "boolean",
-                        "float",
-                        "double",
-                        "decimal",
-                        "date",
-                        "timestamp",
-                        "timestamptz",
-                        "uuid",
-                        "json",
-                        "jsonb",
-                        "blob",
-                        "bytea"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "enum": [
+                                "integer",
+                                "bigint",
+                                "smallint",
+                                "serial",
+                                "bigserial",
+                                "text",
+                                "varchar",
+                                "char",
+                                "boolean",
+                                "float",
+                                "double",
+                                "decimal",
+                                "date",
+                                "timestamp",
+                                "timestamptz",
+                                "uuid",
+                                "json",
+                                "jsonb",
+                                "blob",
+                                "bytea"
+                            ]
+                        },
+                        { "$ref": "#/definitions/EnvVar" }
                     ]
                 },
                 "primary_key": {
@@ -1143,15 +1179,19 @@
                     "description": "The name of the referenced column."
                 },
                 "on_delete": {
-                    "type": "string",
                     "description": "Action to perform on deleting a record.",
-                    "enum": [ "cascade", "set_null", "restrict", "no_action" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "cascade", "set_null", "restrict", "no_action" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "restrict"
                 },
                 "on_update": {
-                    "type": "string",
                     "description": "Action to perform on updating a record.",
-                    "enum": [ "cascade", "set_null", "restrict", "no_action" ],
+                    "anyOf": [
+                        { "type": "string", "enum": [ "cascade", "set_null", "restrict", "no_action" ] },
+                        { "$ref": "#/definitions/EnvVar" }
+                    ],
                     "default": "restrict"
                 }
             },
